@@ -103,4 +103,24 @@ export class SingalingGateway
       roomName: payload.roomName,
     });
   }
+
+  @SubscribeMessage('ice-candidate')
+  handleIceCandidate(
+    @MessageBody()
+    payload: {
+      targetSocketId: string;
+      senderSocketId: string;
+      candidate: RTCIceCandidateInit;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.logger.log(
+      `ice-candidate sent from ${payload.senderSocketId} to ${payload.targetSocketId}`,
+    );
+
+    client.to(payload.targetSocketId).emit('ice-candidate', {
+      candidate: payload.candidate,
+      senderSocketId: payload.senderSocketId,
+    });
+  }
 }
