@@ -5,6 +5,8 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
@@ -56,6 +58,49 @@ export class SingalingGateway
     client.broadcast.to(payload.roomId).emit('user-left', {
       socketId: client.id,
       userId: payload.userId,
+    });
+  }
+
+  @SubscribeMessage('offer')
+  handleOffer(
+    @MessageBody()
+    payload: {
+      targetSocketId: string;
+      offer: RTCSessionDescriptionInit;
+      senderSocketId: string;
+      roomName: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.logger.log(
+      `Received offer from ${payload.senderSocketId} to ${payload.targetSocketId} in ${payload.roomName}`,
+    );
+
+    client.to(payload.targetSocketId).emit('offer', {
+      offer: payload.offer,
+      senderSocketId: payload.senderSocketId,
+    });
+  }
+
+  @SubscribeMessage('answer')
+  handleAnswer(
+    @MessageBody()
+    payload: {
+      senderSocketId: string;
+      offer: RTCSessionDescriptionInit;
+      targetSocketId: string;
+      roomName: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.logger.log(
+      `Received answer from ${payload.senderSocketId} ${client.id} for ${payload.targetSocketId} in room ${payload.roomName}`,
+    );
+
+    client.to(payload.targetSocketId).emit('answer', {
+      offer: payload.offer,
+      senderSocketId: client.id,
+      roomName: payload.roomName,
     });
   }
 }
