@@ -45,4 +45,17 @@ export class SingalingGateway
       userId: payload.userId,
     });
   }
+
+  @SubscribeMessage('leave-room')
+  handleLeaveRoom(client: Socket, payload: { roomId: string; userId: string }) {
+    client.leave(payload.roomId);
+    this.logger.log(
+      `Client ${payload.userId} ${client.id} left room ${payload.roomId}`,
+    );
+
+    client.broadcast.to(payload.roomId).emit('user-left', {
+      socketId: client.id,
+      userId: payload.userId,
+    });
+  }
 }
