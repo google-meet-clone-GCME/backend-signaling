@@ -33,4 +33,16 @@ export class SingalingGateway
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
+
+  @SubscribeMessage('join-room')
+  handleJoinRoom(client: Socket, payload: { roomId: string; userId: string }) {
+    client.join(payload.roomId);
+    this.logger.log(
+      `Client ${payload.userId} ${client.id} joined room ${payload.roomId}`,
+    );
+    client.broadcast.to(payload.roomId).emit('user-joined', {
+      socketId: client.id,
+      userId: payload.userId,
+    });
+  }
 }
