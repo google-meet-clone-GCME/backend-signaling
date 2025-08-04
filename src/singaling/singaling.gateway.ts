@@ -87,7 +87,7 @@ export class SingalingGateway
     @MessageBody()
     payload: {
       senderSocketId: string;
-      offer: RTCSessionDescriptionInit;
+      answer: RTCSessionDescriptionInit;
       targetSocketId: string;
       roomName: string;
     },
@@ -98,7 +98,7 @@ export class SingalingGateway
     );
 
     client.to(payload.targetSocketId).emit('answer', {
-      answer: payload.offer,
+      answer: payload.answer,
       senderSocketId: client.id,
       roomName: payload.roomName,
     });
