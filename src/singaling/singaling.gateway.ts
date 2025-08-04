@@ -98,7 +98,7 @@ export class SingalingGateway
     );
 
     client.to(payload.targetSocketId).emit('answer', {
-      offer: payload.offer,
+      answer: payload.offer,
       senderSocketId: client.id,
       roomName: payload.roomName,
     });
